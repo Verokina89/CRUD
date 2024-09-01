@@ -1,7 +1,4 @@
-// Importamos el módulo Express
 const express = require('express');
-
-// Creamos una instancia de Express
 const app = express();
 
 // Usamos el middleware para analizar datos JSON en el cuerpo de las solicitudes
@@ -22,3 +19,18 @@ app.get('/usuarios', (req, res) => {
     res.send(usuarios);
 });
 
+// Endpoint para obtener un usuario por nombre
+app.get('/usuarios/:nombre', (req, res) => {
+    const nombre = req.params.nombre; // Obtener el nombre desde los parámetros de la URL
+    const usuario = usuarios.find(usuario => usuario.nombre === nombre);
+    if (usuario) {
+        res.send(usuario);
+    } else {
+        res.status(404).send('Usuario no encontrado');
+    }
+});
+
+// Iniciar el servidor en el puerto 3000
+app.listen(3000, () => {
+    console.log('Servidor ejecutándose en http://localhost:3000');
+});
