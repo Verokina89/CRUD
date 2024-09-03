@@ -13,7 +13,6 @@ let usuarios = [
     { id: 5, nombre: 'Blanka', edad: 32, lugarProcedencia: 'Brasil' },
 ];
 
-
 // Endpoint para obtener todos los usuarios.
 app.get('/usuarios', (req, res) => {
     res.json(usuarios); // res.send(usuarios);
@@ -46,17 +45,29 @@ app.post('/usuarios', (req, res) => {
 
 // // PUT /usuarios/:nombre:Actualiza la información del usuario por su nombre.
 app.put('/usuarios/:nombre', (req, res) => {
-    const nombre = req.params.nombre.toLowerCase();
-    const index = usuarios.findIndex(usuario => usuario.nombre.toLowerCase() === nombre);
-    if (index !== -1) {
-        usuarios[index] = {
-            ...usuarios[index],  // Mantiene los datos actuales
-            ...req.body  // Actualiza con los nuevos datos
-        };
-        res.json(usuarios[index]);  // Responde solo con el usuario actualizado
-    } else {
-        res.status(404).send('Usuario no encontrado');
-    }
+  const nombre = req.params.nombre.toLowerCase();
+  // Encuentra el índice del usuario en la lista que coincida con el nombre proporcionado.
+  const index = usuarios.findIndex(usuario => usuario.nombre.toLowerCase() === nombre);
+  // Si el usuario es encontrado, actualiza sus datos.
+  if (index !== -1) {
+      // Crear un nuevo objeto usuario que será la versión actualizada.
+      const usuarioActualizado = {
+          id: usuarios[index].id, // Mantiene el mismo ID.
+          nombre: req.body.nombre || usuarios[index].nombre, // Si no se proporciona un nuevo nombre, mantén el actual.
+          edad: req.body.edad || usuarios[index].edad, // Si no se proporciona una nueva edad, mantén la actual.
+          lugarProcedencia: req.body.lugarProcedencia || usuarios[index].lugarProcedencia // Si no se proporciona un nuevo lugar de procedencia, mantén el actual.
+      };
+
+      // Reemplaza el usuario viejo con el nuevo usuario actualizado.
+      usuarios[index] = usuarioActualizado;
+
+      // Envía una respuesta con el usuario actualizado.
+      res.json(usuarioActualizado);
+
+  } else {
+      // Si el usuario no es encontrado, responde con un mensaje de error 404 (No encontrado).
+      res.status(404).send('Usuario no encontrado');
+  }
 });
 
 // DELETE /usuarios/:nombre: Elimina un usuario por nombre
@@ -77,63 +88,25 @@ app.listen(PORT, () => {
     console.log(`El Servidor está ejecutandose en http://localhost:${PORT}`);
 });
 
-/* Modificacines de blques de codigos
-
-// app.post('/usuarios', (req, res) => {
-    //     const nuevoUsuario = {
-        //         id: usuarios.length + 1,  // Asignamos ID único
-        //         nombre: req.body.nombre,
-        //         edad: req.body.edad,
-        //         lugarProcedencia: req.body.lugarProcedencia
-    // };
-        // usuarios.push(nuevoUsuario);
-        //     res.json(usuarios); //res.redirect('/');
-// });
-        
-app.put('/usuarios/:nombre', (req, res) => {
-    const nombre = req.params.nombre.toLowerCase();
-    // Encuentra el índice del usuario en la lista que coincida con el nombre proporcionado.
-    const index = usuarios.findIndex(usuario => usuario.nombre.toLowerCase() === nombre);
-    // Si el usuario es encontrado, actualiza sus datos.
-    if (index !== -1) {
-        // Crear un nuevo objeto usuario que será la versión actualizada.
-        const usuarioActualizado = {
-            id: usuarios[index].id, // Mantiene el mismo ID.
-            nombre: req.body.nombre || usuarios[index].nombre, // Si no se proporciona un nuevo nombre, mantén el actual.
-            edad: req.body.edad || usuarios[index].edad, // Si no se proporciona una nueva edad, mantén la actual.
-            lugarProcedencia: req.body.lugarProcedencia || usuarios[index].lugarProcedencia // Si no se proporciona un nuevo lugar de procedencia, mantén el actual.
-        };
-
-        // Reemplaza el usuario viejo con el nuevo usuario actualizado.
-        usuarios[index] = usuarioActualizado;
-
-        // Envía una respuesta con el usuario actualizado.
-        res.json(usuarioActualizado);
-
-    } else {
-        // Si el usuario no es encontrado, responde con un mensaje de error 404 (No encontrado).
-        res.status(404).send('Usuario no encontrado');
-    }
-});        
-
-        
-        app.delete('/usuarios/:nombre', (req, res) => {
-            const nombre = req.params.nombre.toLowerCase();
-            const usuario = usuarios.find(usuario => usuario.nombre.toLowerCase() === nombre);
-            if (usuario) {
-                usuarios = usuarios.filter(usuario => usuario.nombre.toLowerCase() !== nombre);
-                res.json(usuarios);
-            } else {
-                res.status(404).send('Usuario no encontrado');
-            }
-        });
-
-        */
 
 
-       /*
-       const express = require("express")
-       const app = express()
+/*--- Modificacines de blques de codigos    
+app.delete('/usuarios/:nombre', (req, res) => {
+  const nombre = req.params.nombre.toLowerCase();
+  const usuario = usuarios.find(usuario => usuario.nombre.toLowerCase() === nombre);
+  if (usuario) {
+    usuarios = usuarios.filter(usuario => usuario.nombre.toLowerCase() !== nombre);
+    res.json(usuarios);
+  } else {
+    res.status(404).send('Usuario no encontrado');
+  }
+});
+
+---*/
+
+/*---
+const express = require("express")
+const app = express()
 
 let usuarios = [
   { id: 1, nombre: 'Ryu', edad: 32, lugarProcedencia: 'Japón' },
@@ -235,4 +208,4 @@ const PORT = 3000
 app.listen(PORT, () => {
   console.log(`La aplicación CRUD está escuchando en el puerto http://localhost:${PORT}`)
 })
-*/
+---*/
