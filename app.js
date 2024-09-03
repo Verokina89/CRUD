@@ -13,24 +13,49 @@ let usuarios = [
     { id: 5, nombre: 'Blanka', edad: 32, lugarProcedencia: 'Brasil' },
 ];
 
-// Endpoint para obtener todos los usuarios.
+////READ (se utiliza el READ para poder trabajarlo)
+app.get("/", (req, res) => {
+  res.send(`
+    <!DOCTYPE html>
+      <html lang="es">
+      <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Document</title>
+      </head>
+      <body>
+      <h1>Luchadores Street Fighter II</h1>
+      <ul>
+        ${usuarios.map(usuario => `<li>
+          <h2>Nombre: ${usuario.nombre}</li></h2>
+          <p>Edad: ${usuario.edad}</p>
+          <p>procedencia: ${usuario.lugarProcedencia}</p>
+          `).join("")}
+      </ul>
+      </body>
+</html>
+  `)
+})
+
+// Endpoint para obtener todos los usuarios en formato JSON.
+//CREATE(del CRUD). nos devuelve en formato json
 app.get('/usuarios', (req, res) => {
     res.json(usuarios); // res.send(usuarios);
 });
 
-// Endpoint para obtener usuario por nombre
+// Endpoint para obtener usuario por nombre.
 app.get('/usuarios/:nombre', (req, res) => {
     const nombre = req.params.nombre.toLowerCase(); //Se obtiene el nombre desde los parámetros de la URL y se convierten en minusclas.
     const usuario = usuarios.find(usuario => usuario.nombre.toLowerCase() === nombre);
-
-    if (usuario) {
-        res.json(usuario);
+    if(!usuario) {
+      res.status(404).json({mensaje: "El usuario no existe"})
     } else {
-        res.status(404).send('Usuario no encontrado');
+      res.json(usuario)
     }
 });
 
-// // Endpoint para crear un nuevo usuario
+// // Endpoint para crear un nuevo usuario. 
+//Ruta o Middleware POST. Crea y envia el nuevo usuario y lo agrega a la lista.
 app.post('/usuarios', (req, res) => {
     const maxId = usuarios.length > 0 ? Math.max(...usuarios.map(u => u.id)) : 0;
     const nuevoUsuario = {
@@ -40,10 +65,50 @@ app.post('/usuarios', (req, res) => {
         lugarProcedencia: req.body.lugarProcedencia
     };
     usuarios.push(nuevoUsuario);
-    res.status(201).json(nuevoUsuario);  // Retorna solo el nuevo usuario y con código de estado 201 (creado)
+    res.redirect("/usuarios")    // res.status(201).json(nuevoUsuario);   // Retorna solo el nuevo usuario y con código de estado 201 (creado)
 });
 
 // // PUT /usuarios/:nombre:Actualiza la información del usuario por su nombre.
+app.put("/usuarios/:nombre", (req, res) => {
+  const nombre = req.params.nombre
+  const nombreNuevo = req.body.nombre || ""
+  const edadNueva = req.body.edad || ""
+  const ProcedenciaNueva = req.body.lugarProcedencia
+  
+  const index = usuarios.findIndex(usuario => usuario.nombre === nombre);
+  if(index === -1) {
+    res.status(404).json({error: "usuario no encontrado"})
+  } else {
+    usuarios[index] = {
+    ...usuarios[index],
+    nombre: nombreNuevo || usuarios[index].nombre,
+    dad: edadNueva || usuarios[index].edad,
+    lugarProcedencia: ProcedenciaNueva || usuarios[index].lugarProcedencia
+    }
+    res.json(usuarios[index])
+  }
+});
+
+// DELETE /usuarios/:nombre: Elimina un usuario por nombre
+app.delete('/usuarios/:nombre', (req, res) => {
+  const nombre = req.params.nombre.toLowerCase();
+  const index = usuarios.findIndex(usuario => usuario.nombre.toLowerCase() === nombre);
+  if(index === -1) {
+    res.status(404).json({error: "usuario no encontrado"})
+  } else {
+    usuarios = usuarios.filter(usuario => usuario.nombre !== nombre)
+    res.json({mensaje: "usuario eliminado correctamente"})
+  }
+});
+
+const PORT = 3000;
+app.listen(PORT, () => {
+    console.log(`La aplicación CRUD está escuchando en el puerto http://localhost:${PORT}`);
+});
+
+
+
+/*--- Modificacines de blques de codigos   
 app.put('/usuarios/:nombre', (req, res) => {
   const nombre = req.params.nombre.toLowerCase();
   // Encuentra el índice del usuario en la lista que coincida con el nombre proporcionado.
@@ -70,27 +135,6 @@ app.put('/usuarios/:nombre', (req, res) => {
   }
 });
 
-// DELETE /usuarios/:nombre: Elimina un usuario por nombre
-app.delete('/usuarios/:nombre', (req, res) => {
-    const nombre = req.params.nombre.toLowerCase();
-    const usuario = usuarios.find(usuario => usuario.nombre.toLowerCase() === nombre);
-    if (usuario) {
-        usuarios = usuarios.filter(usuario => usuario.nombre.toLowerCase() !== nombre);
-        res.json({ mensaje: `Usuario ${nombre} eliminado` });  // Responde con una confirmación de eliminación
-    } else {
-        res.status(404).send('Usuario no encontrado');
-    }
-});
-
-
-const PORT = 3000;
-app.listen(PORT, () => {
-    console.log(`El Servidor está ejecutandose en http://localhost:${PORT}`);
-});
-
-
-
-/*--- Modificacines de blques de codigos    
 app.delete('/usuarios/:nombre', (req, res) => {
   const nombre = req.params.nombre.toLowerCase();
   const usuario = usuarios.find(usuario => usuario.nombre.toLowerCase() === nombre);
